@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_account_move,access_account_move,account.model_account_move,installments_user_group,1,1,1,1
+access_installment_installment,access_installment_installment,customer_installments_and_payments.model_installment_installment,,1,1,1,1
+
+
+
+

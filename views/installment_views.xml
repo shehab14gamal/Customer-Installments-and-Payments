@@ -1,0 +1,223 @@
+<odoo>
+    <data>
+        <!--installment form view-->
+        <record id="installment_installment_form_view" model="ir.ui.view">
+            <field name="name">installment installment form view</field>
+            <field name="model">installment.installment</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button string="Open" type="object" name="open_action"
+                                class="oe_highlight" attrs="{'invisible':[('state','!=','draft')]}"/>
+                        <button string="Payment" type="object" name="payment_action"
+                                class="oe_highlight" attrs="{'invisible':[('state','!=','open')]}"/>
+                        <button string="Settlement" type="object" name="settlement_action"
+                                class="oe_highlight" attrs="{'invisible':[('state','in',['draft','paid'])]}"/>
+                        <button string="Set to Draft" type="object" name="set_draft_action"
+                                attrs="{'invisible':[('state','=','draft')]}"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div name="button_box" class="oe_button_box">
+                            <button name="button_open_journal_items" class="oe_stat_button"
+                                    type="object" icon="fa-bars" attrs="{'invisible':[('move_count','=',0)]}"
+                                    groups="customer_installments_and_payments.installments_manager_group">
+                                <field name="move_count"/>
+                                Invoice
+                            </button>
+                        </div>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name"/>
+                            </h1>
+                        </div>
+
+                        <group>
+                            <group>
+                                <field name="customer_id" required="1"/>
+                                <field name="date"/>
+                                <field name="amount"/>
+                            </group>
+                            <group>
+                                <field name="journal_id" required="1"/>
+                                <field name="account_id" required="1"/>
+                                <field name="analytic_account_id"/>
+                                <field name="analytic_tag_ids" widget="many2many_tags"/>
+                            </group>
+                            <group>
+                                <field name="reference"/>
+                            </group>
+                            <group>
+                                <field name="notes"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Payments">
+                                <field name="payment_ids" readonly="1" force_save="1"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <!--installment tree view-->
+        <record id="installment_installment_tree_view" model="ir.ui.view">
+            <field name="name">installment installment tree view</field>
+            <field name="model">installment.installment</field>
+            <field name="arch" type="xml">
+                <tree>
+
+                    <field name="date"/>
+                    <field name="name"/>
+                    <field name="customer_id"/>
+                    <field name="journal_id"/>
+                    <field name="account_id"/>
+                    <field name="analytic_account_id"/>
+                    <field name="analytic_tag_ids" widget="many2many_tags"/>
+                    <field name="amount"/>
+                    <field name="state" widget="badge" decoration-info="state == 'draft'"
+                           decoration-success="state == 'paid'"/>
+                </tree>
+            </field>
+        </record>
+
+
+        <!--installment kanban view-->
+        <record id="installment_installment_kanban_view" model="ir.ui.view">
+            <field name="name">installment.installment.kanban</field>
+            <field name="model">installment.installment</field>
+            <field name="arch" type="xml">
+                <kanban class="o_res_partner_kanban">
+                    <field name="id"/>
+                    <field name="customer_id"/>
+                    <field name="date"/>
+                    <field name="amount"/>
+                    <field name="customer_image"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_global_click">
+                                <div class="row mb4">
+                                    <div class="col-6">
+                                        <strong>
+                                            <span>
+                                                <field name="name"/>
+                                            </span>
+                                        </strong>
+                                    </div>
+                                    <div class="col-6 text-right">
+                                        <strong>
+                                            <i class="fa fa-clock-o" role="img" aria-label="Date" title="Date"/>
+                                            <t t-esc="record.date.value"/>
+                                        </strong>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <span>
+                                            <field name="customer_id"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <field name="amount" widget="monetary"/>
+                                    </div>
+                                    <div class="col-6">
+                                        <span class="float-right">
+                                            <field name="state" widget="label_selection"
+                                                   options="{'classes': {'draft': 'secondary', 'sent': 'success'}}"/>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+
+       <!--installment search view-->
+        <record id="installment_installment_search" model="ir.ui.view">
+            <field name="name">installment.installment.search</field>
+            <field name="model">installment.installment</field>
+            <field name="arch" type="xml">
+                <search string="Search installments">
+                    <filter string="Draft" domain="[('state', '=', 'draft')]" name="draft"/>
+                    <filter string="Open" domain="[('state', '=', 'open')]" name="open"/>
+                    <filter string="Paid" domain="[('state', '=', 'paid')]" name="paid"/>
+                    <filter string="Create Date" name="filter_create_date" date="create_date"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Customer" name="customer_id" context="{'group_by': 'customer_id'}"></filter>
+                        <filter string="Analytic Tags" name="analytic_tag_ids"
+                                context="{'group_by': 'analytic_tag_ids'}"></filter>
+                        <filter string="Journal" name="journal_id" context="{'group_by': 'journal_id'}"></filter>
+                        <filter string="Account" name="account_id" context="{'group_by': 'account_id'}"></filter>
+                        <filter string="Analytic Account" name="analytic_account_id"
+                                context="{'group_by': 'analytic_account_id'}"></filter>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+
+        <!--installment pivot view-->
+        <record id="installment_installment_pivot_view" model="ir.ui.view">
+            <field name="name">installment installment pivot view</field>
+            <field name="model">installment.installment</field>
+            <field name="arch" type="xml">
+                <pivot string="Installments Pivot">
+                    <field name="customer_id"/>
+                    <field name="date"/>
+                </pivot>
+            </field>
+        </record>
+
+
+        <!--installment graph view-->
+        <record id="installment_installment_graph_view" model="ir.ui.view">
+            <field name="name">installment installment graph view</field>
+            <field name="model">installment.installment</field>
+            <field name="arch" type="xml">
+                <graph string="Installments Graph" type="pie">
+                    <field name="customer_id"/>
+                    <field name="amount" type="measure"/>
+                </graph>
+            </field>
+        </record>
+
+
+        <!--installment action-->
+        <record id="installment_installment_action" model="ir.actions.act_window">
+            <field name="name">Customer installments</field>
+            <field name="res_model">installment.installment</field>
+            <field name="view_mode">kanban,tree,form,pivot,graph</field>
+        </record>
+
+
+        <!--installment sequence-->
+        <record id="installment_installment_sequence" model="ir.sequence">
+            <field name="name">installment installment sequence</field>
+            <field name="code">installment.installment</field>
+            <field name="prefix">INST/%(year)s/%(month)s/</field>
+            <field eval="1" name="number_next"/>
+            <field eval="1" name="number_increment"/>
+            <field eval="True" name="use_date_range"/>
+            <field eval="False" name="company_id"/>
+            <field name="padding">4</field>
+        </record>
+
+
+        <!--installment menu items-->
+        <menuitem id="installments_menu"
+                  name="Installments"
+        />
+        <menuitem id="customer_installments_menu"
+                  name="Customer installments"
+                  parent="installments_menu"
+                  action="installment_installment_action"
+        />
+    </data>
+</odoo>
